@@ -1,0 +1,81 @@
+# KeyShield local stack: app + postgres + redis (+ one-shot migrate/seed).
+# `docker compose up` → app on http://localhost:3000, /api/health returns healthy.
+
+x-db-env: &db-env
+  DATABASE_URL: postgres://keyshield:keyshield@postgres:5432/keyshield
+  REDIS_URL: redis://redis:6379
+  ADMIN_EMAIL: admin@keyshield.local
+  ADMIN_PASSWORD: correct-horse-battery-staple-42
+  ADMIN_TOTP_SECRET: KS5DEMOADMINSEEDTOTPBASE32SECRET
+
+services:
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_USER: keyshield
+      POSTGRES_PASSWORD: keyshield
+      POSTGRES_DB: keyshield
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keyshield -d keyshield"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    security_opt: ["no-new-privileges:true"]
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    security_opt: ["no-new-privileges:true"]
+
+  # One-shot: apply migrations + seed (default policy, blocklist, demo admin, sample data).
+  migrate:
+    build:
+      context: .
+      target: builder
+    command: sh -c "npm run db:migrate && npm run db:seed"
+    environment: *db-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runner
+    environment:
+      <<: *db-env
+      NODE_ENV: production
+      SESSION_SECRET: change-me-in-prod-please-32-bytes-minimum-secret!!
+      APP_ORIGIN: http://localhost:3000
+      WEBAUTHN_RP_ID: localhost
+      WEBAUTHN_ORIGIN: http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    security_opt: ["no-new-privileges:true"]
+
+volumes:
+  pgdata:
