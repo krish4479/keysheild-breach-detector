@@ -32,6 +32,15 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# local agent tooling artifacts (ruflo / claude-flow) — never part of the app
+.swarm/
+.claude-flow/
+.hive-mind/
+.ruflo/
+ruvector.db
+*.db
 
 # vercel
 .vercel
