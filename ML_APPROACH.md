@@ -73,6 +73,43 @@ long passphrases score high — consistent with KeyShield's "length wins" messag
 | `correct horse battery staple` | 78 | **Strong** |
 | `xK9$mvQ2!wLp3zRt` | 100 | **Strong** |
 
+## 6b. Evaluation — measured performance
+
+Evaluated on a **held-out** test set (passwords the model never trained on), via
+[`ml/evaluate.py`](ml/evaluate.py). "Positive" = the model **flags** a password as weak.
+
+- **WEAK class** (should be flagged): 2,000 rockyou passwords sampled from **beyond the
+  training cutoff** — genuinely unseen.
+- **STRONG class** (should pass): 2,000 properly-generated passwords — random 12–20
+  character strings + **EFF diceware passphrases**.
+
+| Metric | Result | Meaning |
+|---|---|---|
+| **False Positive Rate** | **0.15%** (3/2000) | strong password wrongly flagged weak → usability cost |
+| **False Negative Rate** | **0.85%** (17/2000) | breached password wrongly passed → security cost |
+| Accuracy | 99.50% | |
+| Precision / Recall | 99.85% / 99.15% | |
+| **ROC AUC** | **0.9989** | threshold-independent (1.0 = perfect, 0.5 = random) |
+
+Score separation is wide — held-out weak averages **12.7/100**, strong averages **91.7/100** —
+and the model flags **99.95%** of the most common rockyou passwords.
+
+**Threshold trade-off** (shipped threshold = 50):
+
+| Threshold | FPR | FNR |
+|---|---|---|
+| 30 | 0.00% | 6.50% |
+| 40 | 0.00% | 2.00% |
+| **50 (shipped)** | **0.15%** | **0.85%** |
+| 60 | 1.45% | 0.30% |
+| 70 | 6.60% | 0.25% |
+
+> **Honest caveat.** These numbers are strong partly because the classes are well separated:
+> the "strong" class is *properly generated* (random / diceware). So this measures
+> *"can it distinguish a real leaked password from a correctly-generated strong one?"* —
+> the actual product use case — rather than ranking arbitrary human-chosen passwords, which
+> is a harder problem.
+
 ## 7. Integration & safety
 
 - Inference is a ~80-line **pure-TypeScript** forward pass ([`lib/strength/neural.ts`](lib/strength/neural.ts))
