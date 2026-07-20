@@ -34,11 +34,8 @@ yarn-error.log*
 .env*
 !.env.example
 
-# local agent tooling artifacts (ruflo / claude-flow) — never part of the app
+# local scratch / tooling artifacts — never part of the app
 .swarm/
-.claude-flow/
-.hive-mind/
-.ruflo/
 ruvector.db
 *.db
 
