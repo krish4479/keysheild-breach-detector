@@ -39,6 +39,28 @@ export function labelForScore(score: StrengthScore): StrengthLabel {
   return score <= 1 ? "Weak" : score === 2 ? "Fair" : score === 3 ? "Good" : "Strong";
 }
 
+/**
+ * True when the password reuses the username (or any part of it). We flag the
+ * whole username, and any run of >= 4 characters shared with it — so a username
+ * of "krishjosh" blocks passwords containing "krish", "rish", "josh", etc.
+ * Shared client + server so the checker preview and the server verdict agree.
+ */
+export function passwordContainsUserToken(password: string, userInputs: string[]): boolean {
+  const pw = password.toLowerCase();
+  if (!pw) return false;
+  for (const raw of userInputs) {
+    const u = raw.trim().toLowerCase();
+    if (!u) continue;
+    if (u.length >= 3 && pw.includes(u)) return true; // whole username present
+    for (const token of u.split(/[^a-z0-9]+/)) {
+      for (let i = 0; i + 4 <= token.length; i++) {
+        if (pw.includes(token.slice(i, i + 4))) return true;
+      }
+    }
+  }
+  return false;
+}
+
 const LOG2_10 = Math.log2(10);
 type Match = ZxcvbnResult["sequence"][number];
 

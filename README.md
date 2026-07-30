@@ -10,7 +10,7 @@ Follows OWASP ASVS 5.0 / Top 10, OWASP Auth & REST cheat sheets, NIST SP 800-63B
 
 - **Public checker** (`/checker`) — live, in-browser strength analysis; breach check only on blur/debounce.
 - **Admin console** (`/admin/*`) — analytics dashboard, DB-stored password policy editor, and audit logs. Requires an authenticated admin with MFA, re-checked in every handler.
-- **REST API** — strength, breach, combined validate, policy, admin metrics/audit, health, and security-headers introspection. Documented at `/docs/api` (OpenAPI 3.1, downloadable at `/api/openapi`).
+- **REST API** — strength, breach, combined validate, policy, admin metrics/audit, health, and security-headers introspection.
 - **Security explainer** (`/security`) and a dual-theme "Entropy & Vault" design system.
 
 ### The important invariants

@@ -5,7 +5,6 @@ import { Brand } from "./Brand";
 const NAV = [
   { href: "/checker", label: "Checker" },
   { href: "/security", label: "Security" },
-  { href: "/docs/api", label: "API" },
   { href: "/admin/dashboard", label: "Admin" },
 ] as const;
 
@@ -52,9 +51,6 @@ export function SiteFooter() {
             </li>
             <li>
               <Link href="/security">Security &amp; privacy</Link>
-            </li>
-            <li>
-              <Link href="/docs/api">API docs</Link>
             </li>
           </ul>
         </div>

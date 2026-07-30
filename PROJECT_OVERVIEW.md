@@ -77,19 +77,18 @@ The site has **two areas**: a **public site** (anyone can use) and an **admin co
 
 | # | Page | URL | What it does |
 |---|---|---|---|
-| 1 | **Landing / Home** | `/` | Explains what KeyShield is; buttons to the checker, security page, and API docs; shows the standards it follows and four feature cards. |
+| 1 | **Landing / Home** | `/` | Explains what KeyShield is; buttons to the checker and security page; shows the standards it follows and four feature cards. |
 | 2 | **Password Checker** ⭐ | `/checker` | The flagship tool. Type a password and instantly see its **strength** (Weak/Fair/Good/Strong), estimated **entropy** and crack time, a **requirements checklist**, and — after you click away or press check — whether it's been **breached**. |
 | 3 | **Security & Privacy** | `/security` | A plain-language explainer of how breach detection stays private, why two different hash functions are used, how login/sessions work, how the app defends itself, and what data is (and isn't) kept. |
-| 4 | **API Docs** | `/docs/api` | Human-readable list of every API endpoint, grouped and colour-coded by method, generated from an OpenAPI 3.1 spec. Has a "Download OpenAPI JSON" button. |
-| 5 | **Admin Login** | `/admin/login` | Two-step login: email + password, then a **6-digit MFA code**. The bridge into the admin area. |
+| 4 | **Admin Login** | `/admin/login` | Two-step login: email + password, then a **6-digit MFA code**. The bridge into the admin area. |
 
 ### Admin-only pages (require login + MFA)
 
 | # | Page | URL | What it does |
 |---|---|---|---|
-| 6 | **Dashboard** | `/admin/dashboard` | Security analytics: four stat cards (checks run, weak blocked, breached blocked, MFA adoption %) with mini-sparklines, plus a bar chart of top rejection reasons and a line chart of daily activity. **Aggregate numbers only — never a real password.** |
-| 7 | **Policy Editor** | `/admin/policy` | Turn the password rules on/off and set the numbers (minimum length, max length, minimum strength score, reuse history, etc.). Saved to the database and enforced by the server. |
-| 8 | **Audit Log** | `/admin/audit-logs` | A read-only, time-stamped record of admin/security events (policy changes, logins, MFA events, rate-limit trips…). **Never contains passwords, hashes, or secrets.** |
+| 5 | **Dashboard** | `/admin/dashboard` | Security analytics: four stat cards (checks run, weak blocked, breached blocked, MFA adoption %) with mini-sparklines, plus a bar chart of top rejection reasons and a line chart of daily activity. **Aggregate numbers only — never a real password.** |
+| 6 | **Policy Editor** | `/admin/policy` | Turn the password rules on/off and set the numbers (minimum length, max length, minimum strength score, reuse history, etc.). Saved to the database and enforced by the server. |
+| 7 | **Audit Log** | `/admin/audit-logs` | A read-only, time-stamped record of admin/security events (policy changes, logins, MFA events, rate-limit trips…). **Never contains passwords, hashes, or secrets.** |
 
 ### The password checker in detail (the page a teacher will most likely look at)
 
@@ -150,7 +149,6 @@ All endpoints live under `/api/...`. Every request is validated with Zod (unknow
 | `GET /api/admin/audit-logs` | Audit log feed | **Admin** | — |
 | `GET /api/health` | Health check (DB + Redis + HIBP) | Public | — |
 | `GET /api/security/headers-check` | Reports which security headers are set | Public | — |
-| `GET /api/openapi` | Download the OpenAPI spec | Public | — |
 | `POST /api/auth/login` · `/mfa` · `/logout` | Admin login flow | mixed | yes |
 | `DELETE /api/auth/sessions` | "Log out everywhere" | Auth | yes |
 | `.../auth/webauthn/**` | Passkey register/authenticate | mixed | yes |
@@ -234,7 +232,7 @@ PostgreSQL, managed with Drizzle ORM migrations. **8 tables:**
 | **Unit** (5 files) | Vitest | Strength labels & determinism, policy evaluation, breach logic (asserts *only* the 5-char prefix is sent), Zod validation, trusted-proxy IP handling. |
 | **Security** (1 file) | Vitest | Proves the log redaction works — secrets never reach the logs. |
 | **Integration** (1 file) | Vitest | Hits the running API: health, security headers, validation, admin access denial, CSRF blocking, rate-limit 429s. |
-| **End-to-end** (2 files) | Playwright | Drives a real browser: admin login with a generated TOTP code, and the full public flow (checker, demos, API docs) — with screenshots. |
+| **End-to-end** (2 files) | Playwright | Drives a real browser: admin login with a generated TOTP code, and the public checker flow — with screenshots. |
 
 ---
 

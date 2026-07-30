@@ -28,9 +28,3 @@ test("checker flags a breached password after blur", async ({ page }) => {
   await input.blur();
   await expect(page.locator(".breach.bad")).toContainText(/known breaches/i, { timeout: 15_000 });
 });
-
-test("api docs render the endpoint list", async ({ page }) => {
-  await page.goto("/docs/api");
-  await expect(page.getByText("/api/password/validate")).toBeVisible();
-  await page.screenshot({ path: `${SHOTS}/docs-api.png`, fullPage: true });
-});

@@ -32,9 +32,6 @@ export default function LandingPage() {
           <Link href="/security" className="btn btn-secondary">
             Security &amp; privacy model
           </Link>
-          <Link href="/docs/api" className="btn btn-ghost">
-            API docs
-          </Link>
         </div>
         <div className="mast-badges" style={{ marginTop: 26 }}>
           {STANDARDS.map((s) => (

@@ -4,7 +4,7 @@ import { recordValidation } from "@/lib/metrics";
 import { evaluatePolicy } from "@/lib/policy";
 import { getActivePolicy, isCommonPassword } from "@/lib/policy/store";
 import { enforceRateLimit } from "@/lib/security/rateLimit";
-import { analyzeStrength } from "@/lib/strength";
+import { analyzeStrength, passwordContainsUserToken } from "@/lib/strength";
 import { validateRequestSchema } from "@/lib/validation";
 
 // Combined analyze + breach + policy verdict, enforcing the DB-stored policy.
@@ -33,19 +33,23 @@ export const POST = route(async (req) => {
     policy,
   );
 
+  // Hard rule: the password must not reuse the username (or any part of it).
+  const usernameConflict = passwordContainsUserToken(password, userInputs ?? []);
   const reasons = [...verdict.reasons, ...analysis.reasons.filter((r) => !verdict.reasons.includes(r))];
+  if (usernameConflict) reasons.unshift("Must not contain your username.");
   const suggestions = [...new Set([...verdict.suggestions, ...analysis.suggestions])];
+  const valid = verdict.valid && !usernameConflict;
 
   await recordValidation({
-    weakBlocked: analysis.score < policy.minZxcvbnScore,
+    weakBlocked: analysis.score < policy.minZxcvbnScore || usernameConflict,
     breachedBlocked: breach.breached,
     reasons,
   });
 
   return json({
-    valid: verdict.valid,
+    valid,
     score: analysis.score,
-    riskLevel: verdict.riskLevel,
+    riskLevel: usernameConflict && verdict.riskLevel === "low" ? "medium" : verdict.riskLevel,
     strengthLabel: analysis.label,
     breached: breach.breached,
     breachCount: breach.count,

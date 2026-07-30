@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiPost } from "@/lib/client-api";
 import type { PolicySettings } from "@/lib/policy";
-import { analyzeStrength } from "@/lib/strength";
+import { analyzeStrength, passwordContainsUserToken } from "@/lib/strength";
 import { scoreNeural } from "@/lib/strength/neural";
 import { BreachBadge, type BreachState } from "./BreachBadge";
 import { NeuralGauge } from "./NeuralGauge";
@@ -34,6 +34,7 @@ export function PasswordAnalyzer({
   mfaEnabled = false,
   placeholder = "Try: correct horse battery staple",
   showValidateButton = true,
+  showUsername = false,
   onVerdict,
 }: {
   policy: PolicySettings;
@@ -41,9 +42,11 @@ export function PasswordAnalyzer({
   mfaEnabled?: boolean;
   placeholder?: string;
   showValidateButton?: boolean;
+  showUsername?: boolean;
   onVerdict?: (result: ValidateResponse | null) => void;
 }) {
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [breachState, setBreachState] = useState<BreachState>("idle");
   const [breachCount, setBreachCount] = useState(0);
   const [verdict, setVerdict] = useState<ValidateResponse | null>(null);
@@ -51,7 +54,14 @@ export function PasswordAnalyzer({
   const latest = useRef("");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const analysis = useMemo(() => analyzeStrength(password, userInputs), [password, userInputs]);
+  // Fold the username into the user-context terms fed to the strength engine.
+  const allInputs = useMemo(
+    () => (showUsername && username.trim() ? [...userInputs, username] : userInputs),
+    [showUsername, username, userInputs],
+  );
+  const analysis = useMemo(() => analyzeStrength(password, allInputs), [password, allInputs]);
+  const usernameInPassword =
+    showUsername && Boolean(username.trim()) && Boolean(password) && passwordContainsUserToken(password, [username]);
   // Neural guessability runs locally and defensively (scoreNeural never throws → null).
   const neural = useMemo(() => scoreNeural(password), [password]);
   const charCount = useMemo(() => Array.from(password).length, [password]);
@@ -94,11 +104,20 @@ export function PasswordAnalyzer({
     },
     { key: "nowalk", label: "No keyboard walks or sequences", met: Boolean(password) && !analysis.reasons.some((r) => /keyboard walk|sequential/i.test(r)) },
     { key: "norepeat", label: "No long repeated runs", met: Boolean(password) && !analysis.reasons.some((r) => /repeated/i.test(r)) },
+    ...(showUsername
+      ? [
+          {
+            key: "nouser",
+            label: "Doesn't contain your username",
+            met: Boolean(password) && Boolean(username.trim()) && !usernameInPassword,
+          },
+        ]
+      : []),
   ];
 
   const validate = async () => {
     setValidating(true);
-    const { data } = await apiPost<ValidateResponse>("/api/password/validate", { password, userInputs, mfaEnabled });
+    const { data } = await apiPost<ValidateResponse>("/api/password/validate", { password, userInputs: allInputs, mfaEnabled });
     setVerdict(data);
     onVerdict?.(data);
     setValidating(false);
@@ -107,6 +126,22 @@ export function PasswordAnalyzer({
   return (
     <div style={{ display: "grid", gap: 18 }}>
       <div className="card tall">
+        {showUsername ? (
+          <div className="formfield" style={{ marginBottom: 14 }}>
+            <label htmlFor="pa-username">Username</label>
+            <input
+              id="pa-username"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setVerdict(null);
+              }}
+              placeholder="e.g. krishjosh"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </div>
+        ) : null}
         <div className="spec-label">Password · live strength · analyzed in your browser</div>
         <PasswordField
           value={password}
@@ -116,6 +151,11 @@ export function PasswordAnalyzer({
           aria-label="Password to test"
         />
         <StrengthMeter label={analysis.label} entropyBits={analysis.entropyBits} charCount={charCount} hasValue={Boolean(password)} />
+        {usernameInPassword ? (
+          <div className="alert err" style={{ marginTop: 12, marginBottom: 0 }} role="alert">
+            Your password contains your username — choose one that doesn&apos;t include <b>{username.trim()}</b> (or part of it).
+          </div>
+        ) : null}
         <div style={{ marginTop: 12 }}>
           <BreachBadge state={breachState} count={breachCount} />
         </div>

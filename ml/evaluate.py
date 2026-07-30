@@ -18,7 +18,7 @@ import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 
 random.seed(42)
-MODEL_PATH = "../../../../../../d/IBM INTERN/keyshield/lib/strength/neural-model.json"
+MODEL_PATH = "../lib/strength/neural-model.json"
 try:
     M = json.load(open(MODEL_PATH, encoding="utf-8"))
 except Exception:
@@ -116,10 +116,14 @@ fpr = fp / (fp + tn); fnr = fn / (fn + tp)
 acc = (tp + tn) / (tp + tn + fp + fn)
 prec = tp / (tp + fp) if (tp + fp) else 0.0
 rec = tp / (tp + fn)
+f1 = 2 * prec * rec / (prec + rec) if (prec + rec) else 0.0
 print(f"\n=== At shipped threshold (score < {THR} => flagged weak) ===")
+print(f"  Accuracy  : {acc*100:6.2f}%")
+print(f"  Precision : {prec*100:6.2f}%")
+print(f"  Recall    : {rec*100:6.2f}%")
+print(f"  F1 score  : {f1*100:6.2f}%")
 print(f"  False Positive Rate (strong wrongly flagged weak) : {fpr*100:5.2f}%   [{fp}/{fp+tn}]")
 print(f"  False Negative Rate (weak wrongly passed)         : {fnr*100:5.2f}%   [{fn}/{fn+tp}]")
-print(f"  Accuracy {acc*100:.2f}%   Precision {prec*100:.2f}%   Recall {rec*100:.2f}%")
 print(f"  Confusion: TP={tp} FN={fn} FP={fp} TN={tn}")
 
 print(f"\n=== ROC AUC (threshold-independent) ===")

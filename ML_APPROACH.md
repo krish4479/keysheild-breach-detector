@@ -87,8 +87,10 @@ Evaluated on a **held-out** test set (passwords the model never trained on), via
 |---|---|---|
 | **False Positive Rate** | **0.15%** (3/2000) | strong password wrongly flagged weak → usability cost |
 | **False Negative Rate** | **0.85%** (17/2000) | breached password wrongly passed → security cost |
-| Accuracy | 99.50% | |
-| Precision / Recall | 99.85% / 99.15% | |
+| **Accuracy** | **99.50%** | (TP+TN) / total |
+| **Precision** | **99.85%** | of those flagged weak, how many really were |
+| **Recall** | **99.15%** | of the truly weak, how many were caught |
+| **F1 score** | **99.50%** | harmonic mean of precision & recall |
 | **ROC AUC** | **0.9989** | threshold-independent (1.0 = perfect, 0.5 = random) |
 
 Score separation is wide — held-out weak averages **12.7/100**, strong averages **91.7/100** —

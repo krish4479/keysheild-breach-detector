@@ -13,13 +13,14 @@ export default async function CheckerPage() {
           Is your password strong &amp; safe?
         </h1>
         <p className="lead">
-          Strength is analyzed on your device as you type. Breach detection sends only a 5-character hash
-          prefix — never your password.
+          Enter a username and password — strength is analyzed on your device as you type, and the checker
+          makes sure your password doesn&apos;t reuse your username. Breach detection sends only a 5-character
+          hash prefix — never your password.
         </p>
         <div style={{ margin: "22px 0 18px" }}>
           <PrivacyNote />
         </div>
-        <PasswordAnalyzer policy={policy} />
+        <PasswordAnalyzer policy={policy} showUsername />
       </section>
     </PageShell>
   );

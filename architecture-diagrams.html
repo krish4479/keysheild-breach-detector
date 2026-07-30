@@ -2485,13 +2485,14 @@ sequenceDiagram
   participant A as API validate
   participant S as Strength (zxcvbn)
   participant P as Policy + DB
-  B->>A: POST { password, mfaEnabled }
+  B->>A: POST { username, password, mfaEnabled }
   A->>A: Zod validate (strict, 64 KB cap)
   A->>S: analyzeStrength()
   par In parallel
     A->>P: checkBreach()  (5-char prefix)
     A->>P: getActivePolicy() + isCommonPassword()
   end
+  A->>S: reject if password reuses username
   A->>P: evaluatePolicy()
   A->>P: record aggregate metric (no password)
   A-->>B: { valid, score, riskLevel, breached, reasons }

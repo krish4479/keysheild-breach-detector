@@ -51,7 +51,7 @@ The codebase is organised by responsibility. The `lib/` layer holds all the logi
 flowchart TB
   subgraph Presentation["app/ — Presentation (App Router)"]
     direction LR
-    Public["Public pages<br/>/ · /checker · /security · /docs/api"]
+    Public["Public pages<br/>/ · /checker · /security"]
     Admin["Admin pages<br/>/admin/{login,dashboard,policy,audit-logs}"]
   end
 
@@ -64,7 +64,7 @@ flowchart TB
     APwd["password/{analyze,check-breach,validate}"]
     AAuth["auth/{login,mfa,logout,sessions,webauthn/**}"]
     AAdmin["policy · admin/{metrics,audit-logs}"]
-    ASys["health · security/headers-check · openapi"]
+    ASys["health · security/headers-check"]
   end
 
   subgraph Core["lib/ — Core engines & services"]
@@ -99,13 +99,14 @@ sequenceDiagram
   participant Br as Breach engine
   participant P as Policy + DB
 
-  B->>A: POST { password, userInputs, mfaEnabled }
+  B->>A: POST { password, userInputs (incl. username), mfaEnabled }
   A->>A: Zod validate (strict, reject unknown, 64 KB cap)
   A->>S: analyzeStrength()  → score, entropy, reasons
   par Run in parallel
     A->>Br: checkBreach()  → sends only 5-char hash prefix
     A->>P: getActivePolicy() + isCommonPassword()
   end
+  A->>S: passwordContainsUserToken()  → reject if it reuses the username
   A->>P: evaluatePolicy()  → valid? riskLevel? reasons
   A->>P: recordValidation()  → aggregate counters only (no password)
   A-->>B: { valid, score, riskLevel, breached, breachCount, reasons, suggestions }
