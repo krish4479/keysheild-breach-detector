@@ -8,7 +8,7 @@ import { policyUpdateSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
-// Public read: the checker/demo surfaces the active requirements.
+// Public read: the checker surfaces the active requirements.
 export const GET = route(async () => {
   const policy = await getActivePolicy();
   return json({ policy });

@@ -4,7 +4,7 @@
 
 | Asset | Sensitivity |
 | --- | --- |
-| User-submitted passwords (checker/demo/API) | **Critical** — never persisted; must never leak |
+| User-submitted passwords (checker/API) | **Critical** — never persisted; must never leak |
 | Admin credentials (Argon2id hash, TOTP secret, passkeys) | Critical |
 | Session state (DB rows + encrypted cookie) | High |
 | Password policy | Medium (integrity) |
@@ -25,7 +25,7 @@
 
 ## 3. Actors
 
-- **Anonymous user** — uses the checker/demos and public APIs.
+- **Anonymous user** — uses the checker and public APIs.
 - **Admin** — manages policy, views analytics/audit. Requires password + MFA.
 - **Attacker** — network MITM, credential-stuffer/brute-forcer, XSS/CSRF/clickjacking attempts, IDOR probing, enumeration, abuse/DoS, supply-chain.
 

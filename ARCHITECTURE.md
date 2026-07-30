@@ -51,7 +51,7 @@ The codebase is organised by responsibility. The `lib/` layer holds all the logi
 flowchart TB
   subgraph Presentation["app/ — Presentation (App Router)"]
     direction LR
-    Public["Public pages<br/>/ · /checker · /demo/* · /security · /docs/api"]
+    Public["Public pages<br/>/ · /checker · /security · /docs/api"]
     Admin["Admin pages<br/>/admin/{login,dashboard,policy,audit-logs}"]
   end
 

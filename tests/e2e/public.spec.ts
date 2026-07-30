@@ -29,18 +29,6 @@ test("checker flags a breached password after blur", async ({ page }) => {
   await expect(page.locator(".breach.bad")).toContainText(/known breaches/i, { timeout: 15_000 });
 });
 
-test("signup demo captures a screenshot", async ({ page }) => {
-  await page.goto("/demo/signup");
-  await expect(page.getByRole("heading", { name: /signup/i })).toBeVisible();
-  await page.screenshot({ path: `${SHOTS}/signup.png`, fullPage: true });
-});
-
-test("change-password demo captures a screenshot", async ({ page }) => {
-  await page.goto("/demo/change-password");
-  await expect(page.getByRole("heading", { name: /change a password/i })).toBeVisible();
-  await page.screenshot({ path: `${SHOTS}/change-password.png`, fullPage: true });
-});
-
 test("api docs render the endpoint list", async ({ page }) => {
   await page.goto("/docs/api");
   await expect(page.getByText("/api/password/validate")).toBeVisible();

@@ -79,19 +79,17 @@ The site has **two areas**: a **public site** (anyone can use) and an **admin co
 |---|---|---|---|
 | 1 | **Landing / Home** | `/` | Explains what KeyShield is; buttons to the checker, security page, and API docs; shows the standards it follows and four feature cards. |
 | 2 | **Password Checker** ⭐ | `/checker` | The flagship tool. Type a password and instantly see its **strength** (Weak/Fair/Good/Strong), estimated **entropy** and crack time, a **requirements checklist**, and — after you click away or press check — whether it's been **breached**. |
-| 3 | **Signup Demo** | `/demo/signup` | Shows a realistic sign-up form with live strength + breach checking. Your email/name are fed into the strength engine so passwords built from personal info score lower. *Nothing is actually stored.* |
-| 4 | **Change-Password Demo** | `/demo/change-password` | Shows a safe password-change flow. Emphasises the modern rule that you should **not** be forced to change passwords on a schedule — only when compromise is suspected. |
-| 5 | **Security & Privacy** | `/security` | A plain-language explainer of how breach detection stays private, why two different hash functions are used, how login/sessions work, how the app defends itself, and what data is (and isn't) kept. |
-| 6 | **API Docs** | `/docs/api` | Human-readable list of every API endpoint, grouped and colour-coded by method, generated from an OpenAPI 3.1 spec. Has a "Download OpenAPI JSON" button. |
-| 7 | **Admin Login** | `/admin/login` | Two-step login: email + password, then a **6-digit MFA code**. The bridge into the admin area. |
+| 3 | **Security & Privacy** | `/security` | A plain-language explainer of how breach detection stays private, why two different hash functions are used, how login/sessions work, how the app defends itself, and what data is (and isn't) kept. |
+| 4 | **API Docs** | `/docs/api` | Human-readable list of every API endpoint, grouped and colour-coded by method, generated from an OpenAPI 3.1 spec. Has a "Download OpenAPI JSON" button. |
+| 5 | **Admin Login** | `/admin/login` | Two-step login: email + password, then a **6-digit MFA code**. The bridge into the admin area. |
 
 ### Admin-only pages (require login + MFA)
 
 | # | Page | URL | What it does |
 |---|---|---|---|
-| 8 | **Dashboard** | `/admin/dashboard` | Security analytics: four stat cards (checks run, weak blocked, breached blocked, MFA adoption %) with mini-sparklines, plus a bar chart of top rejection reasons and a line chart of daily activity. **Aggregate numbers only — never a real password.** |
-| 9 | **Policy Editor** | `/admin/policy` | Turn the password rules on/off and set the numbers (minimum length, max length, minimum strength score, reuse history, etc.). Saved to the database and enforced by the server. |
-| 10 | **Audit Log** | `/admin/audit-logs` | A read-only, time-stamped record of admin/security events (policy changes, logins, MFA events, rate-limit trips…). **Never contains passwords, hashes, or secrets.** |
+| 6 | **Dashboard** | `/admin/dashboard` | Security analytics: four stat cards (checks run, weak blocked, breached blocked, MFA adoption %) with mini-sparklines, plus a bar chart of top rejection reasons and a line chart of daily activity. **Aggregate numbers only — never a real password.** |
+| 7 | **Policy Editor** | `/admin/policy` | Turn the password rules on/off and set the numbers (minimum length, max length, minimum strength score, reuse history, etc.). Saved to the database and enforced by the server. |
+| 8 | **Audit Log** | `/admin/audit-logs` | A read-only, time-stamped record of admin/security events (policy changes, logins, MFA events, rate-limit trips…). **Never contains passwords, hashes, or secrets.** |
 
 ### The password checker in detail (the page a teacher will most likely look at)
 
@@ -286,7 +284,7 @@ Be upfront with the teacher — good engineering includes knowing the trade-offs
 - The session cookie uses `SameSite=Lax` (not Strict), relying on the CSRF token + Origin check for the strict layer.
 - CSP allows inline **styles** (not scripts) — a documented, minor trade-off.
 - Minor doc drift: some docs mention Node 22 while the Dockerfile uses Node 24.
-- The signup/change-password pages are **demonstrations** — they don't actually create or change real accounts.
+- The app is a **public password-checking tool** — there are no user accounts, no signup, and no password-change flow. The only accounts are admin accounts for the security console.
 
 ---
 

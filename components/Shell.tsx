@@ -4,8 +4,6 @@ import { Brand } from "./Brand";
 
 const NAV = [
   { href: "/checker", label: "Checker" },
-  { href: "/demo/signup", label: "Signup" },
-  { href: "/demo/change-password", label: "Change" },
   { href: "/security", label: "Security" },
   { href: "/docs/api", label: "API" },
   { href: "/admin/dashboard", label: "Admin" },
